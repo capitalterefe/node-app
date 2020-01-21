@@ -1,0 +1,10 @@
+ Resources:
+   sntTestRepo:
+     Type: AWS::ECR::Repository
+     Properties:
+       RepositoryName: "snt-nodejs"
+ Outputs:
+   AWSTrainingTestArn:
+     Value: !GetAtt sntTestRepo.Arn
+     Export:
+       Name: sntTestRepoArn
