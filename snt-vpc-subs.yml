@@ -1,0 +1,88 @@
+########################################################
+####        Createing A VPC and TWO Subnets      ######
+####        Export VPC and Sub for LoadBalancer  ######
+########################################################0
+
+Parameters:
+  Environment:
+    Default: staging
+    Description: Name stack environment
+    Type: String
+Resources:
+  sntVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: !Join ["/", ["10.0.0.0", "16"]]
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: "default"
+      Tags:
+        - Key: "Name"
+          Value: !Join [":", ["sntVPC", !Ref "AWS::StackName"]]
+
+  sntPubSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - "0"
+          - Fn::GetAZs:
+              Ref: "AWS::Region"
+      CidrBlock: 10.0.10.0/24
+      MapPublicIpOnLaunch: "True"
+      VpcId: !Ref sntVPC
+      Tags:
+        - Key: "Name"
+          Value: !Join [":", ["sntPubsubnet1", !Ref "AWS::StackName"]]
+
+  sntPubSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - "1"
+          - Fn::GetAZs:
+              Ref: "AWS::Region"
+      CidrBlock: 10.0.20.0/24
+      MapPublicIpOnLaunch: "True"
+      VpcId: !Ref sntVPC
+      Tags:
+        - Key: "Name"
+          Value: !Join [":", ["sntPubsubnet2", !Ref "AWS::StackName"]]
+
+    ########################################################
+  ####    Creating InternetGateway and Attaching  ######
+  ####            To the VPC                      ######
+  ########################################################
+
+  sntInternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: !Join [":", ["sntinternetGateway", !Ref "AWS::StackName"]]
+
+  attachGatewayToVPC:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref sntInternetGateway
+      VpcId: !Ref sntVPC
+
+Outputs:
+  sntVPCValue:
+    Description: snt vpc id
+    Value: !Ref sntVPC
+    Export:
+      Name: !Join [":", [!Ref Environment, "VPC"]]
+
+  sntSubnet1Value:
+    Description: snt sntPubSubnet1 value
+    Value: !Ref sntPubSubnet1
+    Export:
+      Name: !Join [":", [!Ref Environment, "sub1"]]
+
+  sntSubnet2Value:
+    Description: snt sntPubSubnet2 value
+    Value: !Ref sntPubSubnet2
+    Export:
+      Name: !Join [":", [!Ref Environment, "sub2"]]
