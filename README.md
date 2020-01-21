@@ -6,9 +6,10 @@ STEPS TO RUN THE STACK
   >- aws cloudformation create-stack --stack-name snt-ecr-repo --template-body file://ecr.yaml
 ### clone source code, build, tag  and push to ECR
    >- git clone https://github.com/capitalterefe/node-app.git
-   >- docker build -t node-app .
-   >- docker tag node-app:latest <account_id>.dkr.ecr.<region>.amazonaws.com/node-app:latest
-   >- docker push <account_id>.dkr.ecr.<region>.amazonaws.com/node-app:latest
+   >- $(aws ecr get-login --no-include-email --region us-east-1)
+   >- docker build -t snt-nodejs .
+   >- docker tag snt-nodejs:latest <accountid>.dkr.ecr.us-east-1.amazonaws.com/snt-nodejs:latest
+   >- docker push <accountid>.dkr.ecr.us-east-1.amazonaws.com/snt-nodejs:latest
 ### Build VPC and Two Subnets in different AZ
   >- aws cloudformation create-stack --stack-name snt-vpc-subs  --template-body file://snt-vpc-subs.yml
 ### Build a load Balancer
