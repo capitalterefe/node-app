@@ -1,0 +1,65 @@
+########################################################
+####        Createing A LoadBalancer, LB-SecurityGroup,
+#####     LoadBalancer Listner, And TargetGroup      ######
+########################################################0
+
+Parameters:
+  Environment:
+    Default: staging
+    Description: Name of stack Environment
+    Type: String
+Resources:
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: snt-aws-lb
+      Subnets:
+        - Fn::ImportValue: !Join [":", [!Ref Environment, "sub1"]]
+        - Fn::ImportValue: !Join [":", [!Ref Environment, "sub2"]]
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS LB security group
+      VpcId:
+        Fn::ImportValue: !Join [":", [!Ref Environment, "VPC"]]
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Protocol: HTTP
+      Port: 80
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref DefaultTargetGroup
+  DefaultTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: snt-targetGroup
+      VpcId:
+        Fn::ImportValue: !Join [":", [!Ref Environment, "VPC"]]
+      Protocol: HTTP
+      Port: 80
+
+Outputs:
+  LoadBalancerDNS:
+    Description: Domain name for the loadbalancer
+    Value: !GetAtt LoadBalancer.DNSName
+    Export:
+      Name: !Join [":", [!Ref Environment, "LoadBalancerDNS"]]
+  LoadBalancerListener:
+    Description: loadbalancer listener
+    Value: !Ref LoadBalancerListener
+    Export:
+      Name: !Join [":", [!Ref Environment, "ListnerARN"]]
+  LoadBalancerSecurityGroup:
+    Description: Loadbalancer security group
+    Value: !Ref LoadBalancerSecurityGroup
+    Export:
+      Name: !Join [":", [!Ref Environment, "LBsecurityGroup"]]
