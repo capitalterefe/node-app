@@ -3,7 +3,7 @@ STEPS TO RUN THE STACK
 ===================
 
 ### Build ECR and Push Sample APP
-   aws cloudformation create-stack --stack-name snt-ecr-repo --template-body file://ecr.yaml
+  >- aws cloudformation create-stack --stack-name snt-ecr-repo --template-body file://ecr.yaml
 ### clone source code, build, tag  and push to ECR
    >- git clone https://github.com/capitalterefe/node-app.git
    >- docker build -t node-app .
